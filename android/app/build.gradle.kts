@@ -30,10 +30,6 @@ android {
     if (System.getenv("ANDROID_NDK_HOME") != null) {
         ndkPath = System.getenv("ANDROID_NDK_HOME")
     }
-    
-    // 明确指定NDK版本以解决版本冲突
-    ndkVersion = "27.0.12077973"
-    
     compileSdk = 35
 
     sourceSets {
@@ -73,13 +69,6 @@ android {
             storeFile = file("../key.jks")
             storePassword = System.getenv("KEY_PASSWORD")
         }
-        // 添加一个调试用的临时签名配置
-        create("debug") {
-            keyAlias = "androiddebugkey"
-            keyPassword = "android"
-            storeFile = file(System.getProperty("user.home") + "/.android/debug.keystore")
-            storePassword = "android"
-        }
     }
 
     buildTypes {
@@ -89,14 +78,8 @@ android {
             signingConfig = signingConfigs.getByName("release")
         }
         getByName("debug") {
-            // 在CI环境中使用默认的debug签名配置
-            if (System.getenv("CI") == "true") {
-                signingConfig = signingConfigs.getByName("debug")
-            } else if (System.getenv("NIGHTLY") == "true") {
+            if (System.getenv("NIGHTLY") == "true") {
                 signingConfig = signingConfigs.getByName("nightly")
-            } else {
-                // 本地开发环境使用默认的debug签名
-                signingConfig = signingConfigs.getByName("debug")
             }
         }
     }
@@ -112,15 +95,6 @@ android {
     }
 
     namespace = "io.rebble.cobble"
-    // 添加支持较新的PKCS#8格式密钥
-    packaging {
-        jniLibs {
-            useLegacyPackaging = false
-        }
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
 //    lint {
 //        isCheckReleaseBuilds = false
 //        disable("InvalidPackage")
