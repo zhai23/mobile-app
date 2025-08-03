@@ -73,9 +73,12 @@ android {
             storeFile = file("../key.jks")
             storePassword = System.getenv("KEY_PASSWORD")
         }
-        // 添加一个不使用签名的配置用于调试
-        create("unsigned") {
-            // 不设置签名信息
+        // 添加一个调试用的临时签名配置
+        create("debug") {
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+            storeFile = file(System.getProperty("user.home") + "/.android/debug.keystore")
+            storePassword = "android"
         }
     }
 
@@ -86,11 +89,14 @@ android {
             signingConfig = signingConfigs.getByName("release")
         }
         getByName("debug") {
-            // 在CI环境中使用unsigned配置避免签名问题
+            // 在CI环境中使用默认的debug签名配置
             if (System.getenv("CI") == "true") {
-                signingConfig = signingConfigs.getByName("unsigned")
+                signingConfig = signingConfigs.getByName("debug")
             } else if (System.getenv("NIGHTLY") == "true") {
                 signingConfig = signingConfigs.getByName("nightly")
+            } else {
+                // 本地开发环境使用默认的debug签名
+                signingConfig = signingConfigs.getByName("debug")
             }
         }
     }
