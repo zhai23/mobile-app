@@ -1,4 +1,4 @@
-name: Android Nightly3
+name: Android Nightly
 
 on:
   push:
@@ -46,9 +46,12 @@ jobs:
       - run: fvm flutter pub get
       - run: fvm flutter analyze
         continue-on-error: true
-#      - name: Flutter test
-#        continue-on-error: true
-#        run: fvm flutter test
+
+      - name: Set up local.properties for GitHub
+        run: |
+          echo "GITHUB_ACTOR=zhai23" >> android/local.properties
+          echo "GITHUB_TOKEN=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" >> android/local.properties
+
       - run: fvm flutter build apk --debug
 
       - uses: actions/upload-artifact@v4
