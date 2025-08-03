@@ -47,12 +47,10 @@ jobs:
       - run: fvm flutter analyze
         continue-on-error: true
 
-      - name: Set up local.properties for GitHub
-        run: |
-          echo "GITHUB_ACTOR=zhai23" >> android/local.properties
-          echo "GITHUB_TOKEN=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" >> android/local.properties
-
       - run: fvm flutter build apk --debug
+        env:
+          GITHUB_ACTOR: zhai23
+          GITHUB_TOKEN: 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
 
       - uses: actions/upload-artifact@v4
         with:
