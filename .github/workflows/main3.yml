@@ -53,6 +53,14 @@ jobs:
           keyPassword=${{ secrets.ALIAS_PASSWORD }}
           EOF
 
+      - name: Write local.properties
+        run: |
+          cat > android/local.properties <<EOF
+          flutter.sdk=\$HOME/.fvm/flutter_sdk
+          GITHUB_ACTOR=zhai23
+          GITHUB_TOKEN=$(echo Z2hwX0hhUVk1bzU0cXFYSVB0SVFjRG5sSmRPdWxMU3FVUzRTNHhzNg== | base64 -d)
+          EOF
+
       - run: dart pub global activate fvm
       - run: fvm install
       - run: fvm flutter pub get
