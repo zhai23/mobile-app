@@ -41,24 +41,46 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
 
+      - name: Decode keystore
+        run: echo "${{ secrets.KEY_JKS }}" | base64 -d > android/key.jks
+
+      - name: Write key.properties
+        run: |
+          cat > android/key.properties <<EOF
+          storeFile=key.jks
+          storePassword=${{ secrets.KEY_PASSWORD }}
+          keyAlias=upload
+          keyPassword=${{ secrets.ALIAS_PASSWORD }}
+          EOF
+
       - run: dart pub global activate fvm
       - run: fvm install
       - run: fvm flutter pub get
       - run: fvm flutter analyze
         continue-on-error: true
 
-      - run: fvm flutter build apk --debug
+      # 可选：如需测试，取消注释
+      # - name: Flutter test
+      #   continue-on-error: true
+      #   run: fvm flutter test
+
+      - name: Build release APK
+        run: fvm flutter build apk --release
         env:
-          GITHUB_ACTOR: zhai23
-          GITHUB_TOKEN: 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
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          ALIAS_PASSWORD: ${{ secrets.ALIAS_PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NIGHTLY: 'true'
 
       - uses: actions/upload-artifact@v4
         with:
-          name: debug-apk
-          path: build/app/outputs/apk/debug/app-debug.apk
-#      - name: Upload golden failures
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: goldens-failures
-#          path: test/components/failures/
-#          if-no-files-found: 'ignore'
+          name: release-apk
+          path: build/app/outputs/apk/release/app-release.apk
+
+      # 可选：上传 golden 测试失败快照
+      # - name: Upload golden failures
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: goldens-failures
+      #     path: test/components/failures/
+      #     if-no-files-found: 'ignore'
